@@ -11,6 +11,7 @@ TOP_K = 5
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 # Flask specific configs (optional)
-DEBUG = True # Set to False in production
+# Sets DEBUG mode based on FLASK_DEBUG env var, defaulting to False (production-safe)
+DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() in ('true', '1', 't')
 HOST = '0.0.0.0'
-PORT = 5001 
+PORT = 5001
