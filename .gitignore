@@ -1,0 +1,6 @@
+.env
+faiss_indices/
+output.json
+app/services/__pycache__
+app/__pycache__
+.venv

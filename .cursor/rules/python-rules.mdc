@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+**Cursor Project Rules for AI Context (cursor.rules)**
+
+This document defines the project rules and coding standards that guide AI-assisted code generation and suggestions within the Cursor editor for this project.
+
+---
+
+## 📌 Project Context
+This project is focused on building a production-ready AI-powered textile search system. Users can upload textile images, and the system returns visually similar products from a database using OpenAI CLIP model + FAISS indexing.
+
+- **Primary Tech Stack:** Python, Torch, Hugging Face, FAISS, PIL, Supabase/PostgreSQL
+- **Code Purpose:** Ingestion pipeline, vector indexing, image search API, user-level access control
+- **AI Model:** `openai/clip-vit-large-patch14`
+
+---
+
+## ✅ Coding Standards
+- **Code Style:** PEP8 compliant
+- **Code Structure:** Modular, minimal, easy to read
+- **Variable Names:** Descriptive but short (`img_path`, `product_ids`, `query_embedding`)
+- **Function Names:** Verb-based (`process_image()`, `build_faiss_index()`)
+- **Logging:** Use simple `print()` statements for steps (or `logging.debug()` in prod)
+- **File Naming:** Use snake_case (`build_faiss_index.py`, `search_similar.py`)
+- **Clean Code:** if the API function that we are calling is big enough it MUST be handeled in a different file
+
+---
+
+## 🔄 Image Processing Rules
+- Always transform each image into multiple variants (flip, rotate, crop, jitter)
+- Average the embeddings of all variants for indexing (unless explicitly grouped)
+- Normalize all CLIP embeddings before storing/searching
+
+---
+
+## 🔍 Search & Matching
+- Use distances to show match confidence
+- Group embeddings by `product_id` when multiple views exist
+- Return product-level match, not image-level
+
+---
+
+## 📂 Output Expectations
+- Minimal code with **clear print steps**
+- The print statements MUST follow this format: [enoji][]
+- Only essential lines, avoid unused imports or over-complication
+- Reusable for production
+- No hardcoded paths (use `os.path.join()`)
+
+---
+
+## ✍️ AI Prompting Guidelines (for this project)
+- Generate production-quality Python scripts
+- Keep each block functional and self-contained
+- Add comments only if logic isn’t obvious
+- Return only code unless asked for explanations
