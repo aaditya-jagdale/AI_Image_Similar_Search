@@ -10,39 +10,39 @@ import json
 from flask import jsonify
 import requests
 from io import BytesIO
-import fitz  # PyMuPDF
-import io # Added io
+import fitz  
+import io 
 
-# Load model & processor globally
+
 model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
 model.eval()
 
-# Use CPU on Mac Mini
+
 if torch.cuda.is_available():
     device = torch.device("cuda")
-elif torch.backends.mps.is_available(): # For PyTorch 1.12 or later
+elif torch.backends.mps.is_available(): 
     device = torch.device("mps")
 else:
     device = torch.device("cpu")
 model.to(device)
 print(f"Using device: {device}")
 
-# --- Configuration Constants ---
+
 INDEX_DIR = "faiss_indices"
-# METADATA_FILE = "output.json" # No longer needed
-IMAGE_BASE_DIR = "" # May still be relevant if other parts use it, but not for PDF processing
+
+IMAGE_BASE_DIR = "" 
 BATCH_SIZE = 10
-# --- Fixed filenames ---
+
 INDEX_FILENAME = "search.faiss"
 METADATA_FILENAME = "search_metadata.json"
-INPUT_JSON_FILENAME = "output.json" # Added default input JSON filename
+INPUT_JSON_FILENAME = "output.json" 
 
 os.makedirs(INDEX_DIR, exist_ok=True)
 
-# Define image transforms (enhanced variants)
+
 transform_list = [
-    transforms.Compose([]),  # Original image
+    transforms.Compose([]),  
     transforms.Compose([transforms.RandomHorizontalFlip(p=1.0)]),
     transforms.Compose([transforms.RandomRotation(25)]),
     transforms.Compose([transforms.ColorJitter(brightness=0.2, contrast=0.2)]),
@@ -52,7 +52,7 @@ transform_list = [
     transforms.Compose([transforms.Grayscale(num_output_channels=3)]),
 ]
 
-# Updated: Accepts a PIL Image object directly
+
 def preprocess_variants(image_obj):
     try:
         img = image_obj.convert("RGB")
@@ -61,22 +61,22 @@ def preprocess_variants(image_obj):
         print(f"Error processing image: {e}")
         return []
 
-# Updated: Processes a batch of dicts containing PIL images and metadata
-# Now accepts 'metadata' key instead of specific PDF keys
+
+
 def process_batch(batch_image_data):
     all_variants = []
     batch_valid_metadata = []
     image_to_variants_map = []
 
     for item in batch_image_data:
-        image_obj = item.get('image_obj') # Use .get for safety
-        variants = preprocess_variants(image_obj) if image_obj else [] # Check if image_obj exists
+        image_obj = item.get('image_obj') 
+        variants = preprocess_variants(image_obj) if image_obj else [] 
         if variants:
             all_variants.extend(variants)
             image_to_variants_map.append(len(variants))
-            # Keep metadata associated with the valid image
-            batch_valid_metadata.append(item["metadata"]) # Store the original metadata dict
-        # Close the PIL image object after processing its variants
+            
+            batch_valid_metadata.append(item["metadata"]) 
+        
         if image_obj:
              image_obj.close()
 
@@ -84,7 +84,7 @@ def process_batch(batch_image_data):
     if not all_variants:
         return [], []
 
-    # Ensure all_variants contains PIL Images before passing to processor
+    
     pil_images = [v for v in all_variants if isinstance(v, Image.Image)]
     if not pil_images:
         print("Warning: No valid PIL images found in batch after transformations.")
@@ -96,15 +96,15 @@ def process_batch(batch_image_data):
         features = model.get_image_features(**inputs)
         features = features / features.norm(dim=-1, keepdim=True)
 
-    # Average variants per image
+    
     embeddings = []
     start = 0
     for count in image_to_variants_map:
-        # Check if start + count exceeds the bounds of features
+        
         if start + count > features.shape[0]:
              print(f"Warning: Index out of bounds. start={start}, count={count}, features_shape={features.shape}")
-             # Handle error, e.g., skip this image or adjust count
-             # For now, let's skip this average calculation if bounds are wrong
+             
+             
              start += count
              continue
 
@@ -116,7 +116,7 @@ def process_batch(batch_image_data):
 
     return embeddings, batch_valid_metadata
 
-# Rewritten: Accepts PDF file streams, extracts images, processes them.
+
 def handle_build_index(pdf_files):
     if not pdf_files:
         return jsonify({"error": "No PDF files provided"}), 400
@@ -128,7 +128,7 @@ def handle_build_index(pdf_files):
         try:
             pdf_filename = pdf_file.filename
             print(f"  Extracting images from: {pdf_filename}")
-            # Open PDF from stream
+            
             pdf_doc = fitz.open(stream=pdf_file.stream.read(), filetype="pdf")
 
             for page_num in tqdm(range(len(pdf_doc)), desc=f"  Pages in {pdf_filename}", leave=False):
@@ -139,13 +139,13 @@ def handle_build_index(pdf_files):
                     xref = img_info[0]
                     base_image = pdf_doc.extract_image(xref)
                     image_bytes = base_image["image"]
-                    # Load image bytes into PIL
+                    
                     try:
                         image_obj = Image.open(BytesIO(image_bytes))
-                        # Store metadata relevant for PDF source
+                        
                         pdf_metadata = {
                             "source_pdf": pdf_filename,
-                            "page": page_num + 1, # 1-indexed page number
+                            "page": page_num + 1, 
                             "image_index_in_page": img_index
                         }
                         extracted_image_data.append({
@@ -154,15 +154,15 @@ def handle_build_index(pdf_files):
                         })
                     except Exception as pil_e:
                         print(f"    Warning: Could not load image {img_index} from page {page_num+1} of {pdf_filename}: {pil_e}")
-                        continue # Skip this image
+                        continue 
 
-            pdf_doc.close() # Close the document after processing
+            pdf_doc.close() 
 
         except Exception as e:
             print(f"Error processing PDF file {pdf_file.filename}: {e}")
-            # Optionally decide if one error should stop the whole process
-            # return jsonify({"error": f"Failed processing {pdf_file.filename}: {e}"}), 500
-            continue # Continue with the next PDF
+            
+            
+            continue 
 
     if not extracted_image_data:
         return jsonify({"error": "No images could be extracted from the provided PDFs"}), 400
@@ -171,7 +171,7 @@ def handle_build_index(pdf_files):
     valid_metadata_list = []
 
     print(f"Generating embeddings for {len(extracted_image_data)} extracted images...")
-    # Process extracted images in batches
+    
     for i in tqdm(range(0, len(extracted_image_data), BATCH_SIZE), desc="Embedding Batches"):
         batch_data = extracted_image_data[i:i+BATCH_SIZE]
         embeddings, valid_metadata = process_batch(batch_data)
@@ -179,8 +179,8 @@ def handle_build_index(pdf_files):
             all_embeddings.extend(embeddings)
             valid_metadata_list.extend(valid_metadata)
 
-    # Cleanup - Explicitly clear list to potentially help GC with large image objects
-    # Although closing images in process_batch should be the main help
+    
+    
     del extracted_image_data
 
     if not all_embeddings:
@@ -193,15 +193,15 @@ def handle_build_index(pdf_files):
     index = faiss.IndexFlatL2(embedding_matrix.shape[1])
     index.add(embedding_matrix)
 
-    # index_id = str(uuid.uuid4()) # Removed UUID generation
-    index_filepath = os.path.join(INDEX_DIR, INDEX_FILENAME) # Use fixed name
-    metadata_filepath = os.path.join(INDEX_DIR, METADATA_FILENAME) # Use fixed name
+    
+    index_filepath = os.path.join(INDEX_DIR, INDEX_FILENAME) 
+    metadata_filepath = os.path.join(INDEX_DIR, METADATA_FILENAME) 
 
     try:
-        # Ensure directory exists right before writing
+        
         os.makedirs(INDEX_DIR, exist_ok=True)
         faiss.write_index(index, index_filepath)
-        # Save metadata linking index rows to source PDF/page/image index
+        
         with open(metadata_filepath, "w") as f:
             json.dump(valid_metadata_list, f, indent=4)
 
@@ -212,16 +212,17 @@ def handle_build_index(pdf_files):
             "message": "Index built successfully from PDFs",
             "local_index_path": index_filepath,
             "local_metadata_path": metadata_filepath,
-            "num_items_indexed": index.ntotal # Should match len(valid_metadata_list)
+            "num_items_indexed": index.ntotal 
         }), 200
     except Exception as e:
         print(f"Error saving index or metadata: {e}")
         return jsonify({"error": f"Failed saving index/metadata: {e}"}), 500
 
-# --- New function to build index from JSON file ---
+
 def handle_build_index_from_json(json_data):
     """
     Builds a FAISS index from image URLs specified in the provided JSON data.
+    Processes images in batches to manage memory usage.
 
     Args:
         json_data (list): A list of objects, where each object contains an "image" URL
@@ -233,68 +234,60 @@ def handle_build_index_from_json(json_data):
     if not isinstance(json_data, list):
         return jsonify({"error": "JSON data must be a list of objects"}), 400
 
-    downloaded_image_data = []
-    print(f"Processing {len(json_data)} items from the provided JSON data...")
-
-    # Wrap the loop with tqdm for progress bar
-    for item in tqdm(json_data, desc="Downloading images from JSON data"):
-        image_url = item.get("image")
-        if not image_url or not isinstance(image_url, str):
-            print(f"Warning: Skipping item due to missing or invalid 'image' URL: {item.get('design_no', 'N/A')}")
-            continue
-
-        try:
-            # Download image with timeout and stream=True for potentially large files
-            response = requests.get(image_url, stream=True, timeout=30) # Added timeout
-            response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
-
-            # Read image content into BytesIO
-            image_bytes = BytesIO(response.content)
-            image_obj = Image.open(image_bytes)
-
-            # Keep the original JSON object as metadata
-            downloaded_image_data.append({
-                "image_obj": image_obj,
-                "metadata": item # Store the entire original item
-            })
-
-        except requests.exceptions.RequestException as req_e:
-            print(f"Warning: Failed to download image from {image_url}: {req_e}")
-            continue # Skip this item
-        # except UnidentifiedImageError: # More specific PIL error
-        #      print(f"Warning: Could not identify image format from {image_url}. Skipping.")
-        #      continue # Skip this item
-        except Exception as img_e:
-            print(f"Warning: Error processing image from {image_url}: {img_e}")
-            continue # Skip this item
-
-    if not downloaded_image_data:
-        return jsonify({"error": "No valid images could be downloaded or processed from the JSON data"}), 400
-
     all_embeddings = []
     valid_metadata_list = []
+    total_items = len(json_data)
 
-    print(f"Generating embeddings for {len(downloaded_image_data)} downloaded images...")
-    # Process downloaded images in batches
-    for i in tqdm(range(0, len(downloaded_image_data), BATCH_SIZE), desc="Embedding Batches (JSON)"):
-        batch_data = downloaded_image_data[i:i+BATCH_SIZE]
-        embeddings, valid_metadata = process_batch(batch_data) # Reuse existing batch processor
-        if embeddings: # Ensure embeddings were actually generated
-             all_embeddings.extend(embeddings)
-             valid_metadata_list.extend(valid_metadata)
+    print(f"Processing {total_items} items from the provided JSON data in batches...")
 
+    
+    for i in tqdm(range(0, total_items, BATCH_SIZE), desc="Processing Item Batches"):
+        current_batch_json_items = json_data[i:i + BATCH_SIZE]
+        current_batch_image_data = [] 
 
-    # Cleanup downloaded image data
-    del downloaded_image_data
+        
+        for item in current_batch_json_items:
+            image_url = item.get("image")
+            if not image_url or not isinstance(image_url, str):
+                print(f"Warning: Skipping item due to missing or invalid 'image' URL in current batch: {item.get('design_no', 'N/A')}")
+                continue
 
+            try:
+                response = requests.get(image_url, stream=True, timeout=30)
+                response.raise_for_status()
+                image_bytes = BytesIO(response.content)
+                image_obj = Image.open(image_bytes)
+                current_batch_image_data.append({
+                    "image_obj": image_obj,
+                    "metadata": item
+                })
+            except requests.exceptions.RequestException as req_e:
+                print(f"Warning: Failed to download image from {image_url}: {req_e}")
+                continue
+            except Exception as img_e: 
+                print(f"Warning: Error processing image from {image_url}: {img_e}")
+                continue
+
+        if not current_batch_image_data:
+            continue 
+
+        embeddings, valid_metadata = process_batch(current_batch_image_data)
+
+        if embeddings: 
+            all_embeddings.extend(embeddings)
+            valid_metadata_list.extend(valid_metadata)
+        
     if not all_embeddings:
+        return jsonify({"error": "No embeddings could be generated from the provided JSON data. Check image URLs and formats."}), 400
+
+    if not all_embeddings: 
         return jsonify({"error": "No embeddings generated from downloaded images"}), 500
 
     embedding_matrix = np.vstack(all_embeddings).astype('float32')
     if embedding_matrix.size == 0:
          return jsonify({"error": "Embedding matrix is empty after processing."}), 500
 
-    # Dimension check (should match CLIP output dimension)
+    
     expected_dim = model.config.projection_dim
     if embedding_matrix.shape[1] != expected_dim:
         return jsonify({"error": f"Embedding dimension mismatch. Expected {expected_dim}, got {embedding_matrix.shape[1]}"}), 500
@@ -303,14 +296,14 @@ def handle_build_index_from_json(json_data):
     index = faiss.IndexFlatL2(embedding_matrix.shape[1])
     index.add(embedding_matrix)
 
-    index_filepath = os.path.join(INDEX_DIR, INDEX_FILENAME) # Use fixed name
-    metadata_filepath = os.path.join(INDEX_DIR, METADATA_FILENAME) # Use fixed name
+    index_filepath = os.path.join(INDEX_DIR, INDEX_FILENAME) 
+    metadata_filepath = os.path.join(INDEX_DIR, METADATA_FILENAME) 
 
     try:
-        # Ensure directory exists right before writing
+        
         os.makedirs(INDEX_DIR, exist_ok=True)
         faiss.write_index(index, index_filepath)
-        # Save metadata (list of original JSON objects corresponding to index rows)
+        
         with open(metadata_filepath, "w") as f:
             json.dump(valid_metadata_list, f, indent=4)
 
@@ -328,5 +321,5 @@ def handle_build_index_from_json(json_data):
         return jsonify({"error": f"Failed saving index/metadata: {e}"}), 500
 
 
-# Original functions below are modified or replaced above.
-# ... (keep other functions if needed, or remove if entirely replaced)
+
+
