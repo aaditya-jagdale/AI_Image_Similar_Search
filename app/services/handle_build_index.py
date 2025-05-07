@@ -19,9 +19,8 @@ processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
 model.eval()
 
 
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-elif torch.backends.mps.is_available(): 
+# The device selection is modified to prioritize MPS then CPU, removing CUDA.
+if torch.backends.mps.is_available(): 
     device = torch.device("mps")
 else:
     device = torch.device("cpu")
