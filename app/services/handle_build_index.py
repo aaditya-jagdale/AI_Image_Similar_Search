@@ -20,10 +20,10 @@ model.eval()
 
 
 # The device selection is modified to prioritize MPS then CPU, removing CUDA.
-if torch.backends.mps.is_available(): 
-    device = torch.device("mps")
-else:
-    device = torch.device("cpu")
+# if torch.backends.mps.is_available(): 
+#     device = torch.device("mps")
+# else:
+device = torch.device("cpu")
 model.to(device)
 print(f"Using device: {device}")
 
