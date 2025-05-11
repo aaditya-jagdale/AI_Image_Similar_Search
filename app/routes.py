@@ -8,6 +8,7 @@ from PIL import Image, UnidentifiedImageError # Add PIL import and specific erro
 from .services.handle_build_index import handle_build_index
 from .services.handle_search import handle_image_search # Import the new handler
 from .services.handle_build_index import handle_build_index_from_json # Import the new JSON index builder
+from .services.download_faiss import download_faiss_files # Import the download function
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1') # Added version prefix
 
@@ -58,6 +59,29 @@ def build_index_from_json_endpoint():
         current_app.logger.error(f"Unexpected error during index build from JSON: {e}")
         traceback.print_exc()
         return jsonify({"error": "An internal server error occurred during JSON index building."}), 500
+
+@api_bp.route('/download_faiss', methods=['POST'])
+def download_faiss_endpoint():
+    """Endpoint to download FAISS index files from Supabase storage."""
+    try:
+        success, message = download_faiss_files()
+        if success:
+            return jsonify({
+                "message": message,
+                "status": "success"
+            }), 200
+        else:
+            return jsonify({
+                "error": message,
+                "status": "error"
+            }), 500
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error during FAISS download: {e}")
+        traceback.print_exc()
+        return jsonify({
+            "error": "An internal server error occurred during FAISS download.",
+            "status": "error"
+        }), 500
 
 @api_bp.app_errorhandler(404)
 def handle_404(err):

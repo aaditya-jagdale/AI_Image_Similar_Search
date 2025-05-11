@@ -2,8 +2,8 @@ import os
 import traceback
 from flask import Flask, jsonify, request
 
-
 from .services.services import ClipService, FaissIndexService
+from .services.download_faiss import download_faiss_files
 from .routes import api_bp
 from . import config 
 
@@ -11,6 +11,15 @@ def create_app():
     """Application Factory: Creates and configures the Flask application."""
     app = Flask(__name__)
     app.config.from_object(config)
+    
+    # Download FAISS index files on startup
+    print("🔄 Downloading FAISS index files...")
+    success, message = download_faiss_files()
+    if not success:
+        print(f"⚠️ Warning: {message}")
+    else:
+        print(f"✅ {message}")
+    
     clip_service = ClipService(model_name=app.config['MODEL_NAME'])
 
     try:
@@ -19,8 +28,6 @@ def create_app():
         print(f"Error during service initialization: {e}")
         print("API might not function correctly until models/index are loaded/built.")
 
-    
-    
     app.extensions['clip_service'] = clip_service
     app.register_blueprint(api_bp)
 
