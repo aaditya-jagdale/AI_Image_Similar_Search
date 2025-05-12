@@ -45,7 +45,7 @@ This project is focused on building a production-ready AI-powered textile search
 
 ## 📂 Output Expectations
 - Minimal code with **clear print steps**
-- The print statements MUST follow this format: [enoji][]
+- The print statements MUST follow this format: [enoji][TITLE][content]
 - Only essential lines, avoid unused imports or over-complication
 - Reusable for production
 - No hardcoded paths (use `os.path.join()`)
@@ -57,3 +57,7 @@ This project is focused on building a production-ready AI-powered textile search
 - Keep each block functional and self-contained
 - Add comments only if logic isn’t obvious
 - Return only code unless asked for explanations
+
+## Print statments and Logs
+- The print statements MUST follow this format: [enoji][TITLE][content]
+

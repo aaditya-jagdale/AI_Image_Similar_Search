@@ -1,0 +1,555 @@
+[
+    {
+        "design_no": "JHC/1",
+        "width": "59",
+        "stock": "2400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-1.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/2",
+        "width": "59",
+        "stock": "2000",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-2.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/3",
+        "width": "59",
+        "stock": "2400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-3.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/4",
+        "width": "59",
+        "stock": "2000",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-4.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/5",
+        "width": "59",
+        "stock": "2450",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-5.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/6",
+        "width": "59",
+        "stock": "2360",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-6.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JHC/7",
+        "width": "59",
+        "stock": "2000",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JHC-7.png",
+        "source_pdf": "HONEYCOMB.pdf"
+    },
+    {
+        "design_no": "JC/69",
+        "width": "63",
+        "stock": "270",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-69.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/51",
+        "width": "50",
+        "stock": "Dobby",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-51.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/50",
+        "width": "50",
+        "stock": "400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-50.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/49",
+        "width": "56",
+        "stock": "490",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-49.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/48",
+        "width": "56",
+        "stock": "930",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-48.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/30",
+        "width": "60",
+        "stock": "1050",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-30.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/29",
+        "width": "60",
+        "stock": "2600",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-29.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/15",
+        "width": "59",
+        "stock": "270",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-15.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/14",
+        "width": "58",
+        "stock": "2400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-14.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/13",
+        "width": "44",
+        "stock": "340",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-13.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/12",
+        "width": "44",
+        "stock": "150",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-12.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/11",
+        "width": "44",
+        "stock": "320",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-11.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/10",
+        "width": "44",
+        "stock": "290",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-10.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/9",
+        "width": "62",
+        "stock": "720",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-9.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/8",
+        "width": "52",
+        "stock": "1270",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-8.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/7",
+        "width": "52",
+        "stock": "720",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-7.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/5",
+        "width": "55",
+        "stock": "2370",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-5.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JC/4",
+        "width": "55",
+        "stock": "1400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JC-4.png",
+        "source_pdf": "Checks.pdf"
+    },
+    {
+        "design_no": "JCP/11",
+        "width": "59",
+        "stock": "250",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-11.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/12",
+        "width": "59",
+        "stock": "400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-12.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/13",
+        "width": "59",
+        "stock": "940",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-13.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/14",
+        "width": "58",
+        "stock": "1360",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-14.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/15",
+        "width": "56",
+        "stock": "600",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-15.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/16",
+        "width": "56",
+        "stock": "600",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-16.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/17",
+        "width": "58",
+        "stock": "390",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-17.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/18",
+        "width": "58",
+        "stock": "540",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-18.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/19",
+        "width": "58",
+        "stock": "150",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-19.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/20",
+        "width": "58",
+        "stock": "390",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-20.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/21",
+        "width": "58",
+        "stock": "300",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-21.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/22",
+        "width": "58",
+        "stock": "210",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-22.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/23",
+        "width": "58",
+        "stock": "140",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-23.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/24",
+        "width": "58",
+        "stock": "270",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-24.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/25",
+        "width": "58",
+        "stock": "210",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-25.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/26",
+        "width": "58",
+        "stock": "480",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-26.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/27",
+        "width": "58",
+        "stock": "1290",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-27.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/28",
+        "width": "58",
+        "stock": "480",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-28.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/29",
+        "width": "58",
+        "stock": "1050",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-29.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/30",
+        "width": "58",
+        "stock": "190",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-30.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/31",
+        "width": "58",
+        "stock": "890",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-31.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/32",
+        "width": "58",
+        "stock": "750",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-32.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/33",
+        "width": "58",
+        "stock": "370",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-33.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/34",
+        "width": "58",
+        "stock": "500",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-34.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/35",
+        "width": "58",
+        "stock": "410",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-35.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/36",
+        "width": "58",
+        "stock": "970",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-36.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/37",
+        "width": "58",
+        "stock": "960",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-37.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/38",
+        "width": "58",
+        "stock": "830",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-38.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/39",
+        "width": "58",
+        "stock": "440",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-39.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/40",
+        "width": "58",
+        "stock": "250",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-40.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/41",
+        "width": "58",
+        "stock": "710",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-41.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/42",
+        "width": "58",
+        "stock": "290",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-42.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/43",
+        "width": "58",
+        "stock": "210",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-43.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/44",
+        "width": "58",
+        "stock": "700",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-44.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/45",
+        "width": "58",
+        "stock": "740",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-45.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/46",
+        "width": "58",
+        "stock": "100",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-46.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/47",
+        "width": "58",
+        "stock": "130",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-47.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/48",
+        "width": "58",
+        "stock": "890",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-48.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/49",
+        "width": "58",
+        "stock": "1100",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-49.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/50",
+        "width": "58",
+        "stock": "900",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-50.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/51",
+        "width": "59",
+        "stock": "260",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-51.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/52",
+        "width": "55",
+        "stock": "1430",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-52.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/53",
+        "width": "42",
+        "stock": "1300",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-53.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/54",
+        "width": "42",
+        "stock": "1400",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-54.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/55",
+        "width": "45",
+        "stock": "2300",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-55.png",
+        "source_pdf": "JCP Prints Catalog.pdf"
+    },
+    {
+        "design_no": "JCP/1",
+        "width": "56",
+        "stock": "450",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-1.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/2",
+        "width": "56",
+        "stock": "470",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-2.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/3",
+        "width": "57",
+        "stock": "590",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-3.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/4",
+        "width": "57",
+        "stock": "930",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-4.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/5",
+        "width": "57",
+        "stock": "420",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-5.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/6",
+        "width": "56",
+        "stock": "330",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-6.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/7",
+        "width": "57",
+        "stock": "370",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-7.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/8",
+        "width": "57",
+        "stock": "470",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-8.png",
+        "source_pdf": "Lycra Prints.pdf"
+    },
+    {
+        "design_no": "JCP/9",
+        "width": "56",
+        "stock": "350",
+        "image": "https://gewbbuoiqiwkdickicys.supabase.co/storage/v1/object/public/products/photos/JCP-9.png",
+        "source_pdf": "Lycra Prints.pdf"
+    }
+]
