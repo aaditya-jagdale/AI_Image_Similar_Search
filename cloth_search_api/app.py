@@ -8,7 +8,7 @@ import os
 import faiss
 import traceback
 from dotenv import load_dotenv
-
+from download_faiss import download_faiss_files
 
 
 app = Flask(__name__)
@@ -126,6 +126,11 @@ def search():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+@app.route("/download_faiss", methods=["GET"])
+def download_faiss():
+    download_faiss_files()
+    return jsonify({"status": "ok"})
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -134,4 +139,5 @@ def health():
 
 if __name__ == "__main__":
     print("[INFO] Starting server on 0.0.0.0:8000")
+    # app.run(host="0.0.0.0", port=8000, debug=True)
     app.run(host="0.0.0.0", port=8000)
