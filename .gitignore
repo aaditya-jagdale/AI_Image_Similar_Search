@@ -4,3 +4,5 @@ output.json
 app/services/__pycache__
 app/__pycache__
 .venv
+cloth_search_api/metadata/search_metadata.json
+cloth_search_api/__pycache__

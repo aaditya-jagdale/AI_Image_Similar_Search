@@ -12,5 +12,5 @@ if __name__ == '__main__':
     debug = app.config.get('DEBUG', False)
     
     print(f"Starting Flask development server on http://{host}:{port} (Debug: {debug})")
-    # app.run(host=host, port=port, debug=debug)
-    app.run()
+    app.run(host=host, port=port, debug=debug)
+    # app.run()

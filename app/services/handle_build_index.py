@@ -31,7 +31,7 @@ print(f"Using device: {device}")
 INDEX_DIR = "faiss_indices"
 
 IMAGE_BASE_DIR = "" 
-BATCH_SIZE = 10
+BATCH_SIZE = 20
 
 INDEX_FILENAME = "search.faiss"
 METADATA_FILENAME = "search_metadata.json"
