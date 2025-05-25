@@ -1,6 +1,11 @@
 import os
-from .supabase import SupabaseService
+from .supabase_service import SupabaseService
+from dotenv import load_dotenv
+import json
 
+load_dotenv()
+
+# ------------------------- Download FAISS Files -------------------------
 def download_faiss_files():
     """
     Downloads FAISS index files from Supabase storage.

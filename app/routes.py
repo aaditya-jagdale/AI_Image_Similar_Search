@@ -5,7 +5,6 @@ import io
 import requests  # Add requests import
 from flask import Blueprint, request, jsonify, current_app
 from PIL import Image, UnidentifiedImageError # Add PIL import and specific error
-from .services.handle_build_index import handle_build_index
 from .services.handle_search import handle_image_search # Import the new handler
 from .services.handle_build_index import handle_build_index_from_json # Import the new JSON index builder
 from .services.download_faiss import download_faiss_files # Import the download function
@@ -15,31 +14,6 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1') # Added version prefix
 @api_bp.route('/')
 def home():
     return jsonify({"message": "The server is running"})
-
-@api_bp.route('/build_index', methods=['POST'])
-def build_index_endpoint():
-    if 'pdf_files' not in request.files:
-        return jsonify({"error": "No 'pdf_files' field in the request"}), 400
-
-    pdf_files = request.files.getlist('pdf_files')
-
-    if not pdf_files or all(f.filename == '' for f in pdf_files):
-        return jsonify({"error": "No PDF files selected or uploaded"}), 400
-
-    # Optional: Add check for file types (e.g., ensure they are PDFs)
-    for f in pdf_files:
-        if not f.filename.lower().endswith('.pdf'):
-            return jsonify({"error": f"File '{f.filename}' is not a PDF."}), 400
-
-    try:
-        # Call the service function with the list of FileStorage objects
-        response, status_code = handle_build_index(pdf_files)
-        return response, status_code
-    except Exception as e:
-        # Log the unexpected error
-        current_app.logger.error(f"Unexpected error during index build from PDFs: {e}")
-        traceback.print_exc() # Print traceback for detailed debugging
-        return jsonify({"error": "An internal server error occurred during index building."}), 500
 
 # --- New route to build index from JSON file ---
 @api_bp.route('/build_index_from_json', methods=['POST'])
