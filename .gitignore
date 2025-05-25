@@ -9,3 +9,5 @@ cloth_search_api/__pycache__
 pdfs
 pdfs copy
 images
+sample_data.json
+app/textile_data.json
