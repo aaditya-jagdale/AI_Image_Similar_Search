@@ -10,6 +10,10 @@ import os
 from dotenv import load_dotenv
 from .search import search_similar, processor, model
 load_dotenv()
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 if os.getenv("QDRANT_URL") is None or os.getenv("QDRANT_API_KEY") is None:
     raise ValueError("QDRANT_URL and QDRANT_API_KEY must be set")
@@ -35,6 +39,17 @@ def get_image_embedding(image_bytes: bytes):
     return embeddings[0].numpy().tolist()
 
 @app.post("/search")
-def search(image_url: str, top_k: int = 10):
-    results = search_similar(image_url, top_k)
-    return results
+async def search(image_url: str, top_k: int = 10):
+    try:
+        print("🔍 Starting search for image")
+        results = await search_similar(image_url, top_k)
+        print("✅ Search completed")
+    except Exception as e:
+        logger.error(f"Qdrant query failed: {e}")
+        raise HTTPException(status_code=500, detail="Qdrant query failed")
+
+    return {"status": "ok", "results": results}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "Never gonna give you up"}
