@@ -33,6 +33,12 @@ collection_name = "textile_designs"
 logger.info(f"[INFO] Collection '{collection_name}' connected.") # Changed to logger
 # Define FastAPI app
 app = FastAPI(title="Textile Design Vector Search API")
+
+# Define request body model for the search endpoint
+class SearchRequest(BaseModel):
+    image_url: str
+    top_k: int = 10
+
 print("--------------------------------\n\n\n")
 print("👇🏻 Starting server...👇🏻")
 print("\n\n\n--------------------------------")
@@ -45,10 +51,10 @@ print("\n\n\n--------------------------------")
 #     return embeddings[0].numpy().tolist()
 
 @app.post("/search")
-async def search(image_url: str, top_k: int = 10):
+async def search(request: SearchRequest): # Changed to accept SearchRequest model
     try:
-        logger.info(f"🔍 Starting search for image_url: {image_url}, top_k: {top_k}") # Changed print to logger
-        results = await search_similar(image_url, top_k)
+        logger.info(f"🔍 Starting search for image_url: {request.image_url}, top_k: {request.top_k}") # Access from request model
+        results = await search_similar(request.image_url, request.top_k) # Pass values from request model
         logger.info("✅ Search completed") # Changed print to logger
         if results is None: # Added check for None results
             logger.warning("Search returned no results or an error occurred upstream.")
