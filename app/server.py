@@ -48,12 +48,13 @@ origins = [
     os.getenv("VITE_URL"),
 ]
 
+# allow all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Only allow specific origins
+    allow_origins=["*"],  # Only allow specific origins
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # Only allow specific methods
-    allow_headers=["Authorization", "Content-Type"],  # Only allow specific headers
+    allow_methods=["*"],  # Only allow specific methods
+    allow_headers=["*"],  # Only allow specific headers
 )
 
 # Define request body model for the search endpoint
