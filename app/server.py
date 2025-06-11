@@ -21,9 +21,9 @@ import time
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-if os.getenv("QDRANT_URL") is None or os.getenv("QDRANT_API_KEY") is None:
-    logger.error("QDRANT_URL, QDRANT_API_KEY must be set in environment variables.")
-    raise ValueError("QDRANT_URL, QDRANT_API_KEY must be set")
+if os.getenv("QDRANT_URL") is None or os.getenv("QDRANT_API_KEY") is None or os.getenv("SUPABASE_URL") is None or os.getenv("SUPABASE_KEY") is None:
+    logger.error("QDRANT_URL, QDRANT_API_KEY, SUPABASE_URL, and SUPABASE_KEY must be set in environment variables.")
+    raise ValueError("QDRANT_URL, QDRANT_API_KEY, SUPABASE_URL, and SUPABASE_KEY must be set")
 
 # Initialize Supabase client
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
