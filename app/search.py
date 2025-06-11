@@ -53,18 +53,7 @@ async def get_embedding(path):
         raise
 
 async def search_similar(image_url: str, client: QdrantClient, user_id: str, top_k: int = 10) -> List:
-    """
-    Search for similar images in a user-specific collection.
-    
-    Args:
-        image_url: URL or path to the image to search for
-        client: Qdrant client instance
-        user_id: User ID to identify the collection
-        top_k: Number of results to return
-        
-    Returns:
-        List of similar images with their metadata
-    """
+
     try:
         logger.info(f"Searching for similar images to {image_url} with top_k={top_k}")
         emb = await get_embedding(image_url)

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 # from qdrant_client.models import Distance, VectorParams # Removed unused import
@@ -39,6 +40,21 @@ collection_name = "textile_designs"
 logger.info(f"[INFO] Collection '{collection_name}' connected.") # Changed to logger
 # Define FastAPI app
 app = FastAPI(title="Textile Design Vector Search API")
+
+# Add CORS middleware
+origins = [
+    "http://localhost:3000",     # Local development
+    "http://localhost:5173",     # Vite default port
+    os.getenv("VITE_URL"),
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Only allow specific origins
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],  # Only allow specific methods
+    allow_headers=["Authorization", "Content-Type"],  # Only allow specific headers
+)
 
 # Define request body model for the search endpoint
 class SearchRequest(BaseModel):
