@@ -61,3 +61,6 @@ This project is focused on building a production-ready AI-powered textile search
 ## Print statments and Logs
 - The print statements MUST follow this format: [enoji][TITLE][content]
 
+#Functions
+- Every time when you write async functions that might require long durations of waiting you MUST add a progress indicator that shows the progress in terminal.
+-
