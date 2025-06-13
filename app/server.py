@@ -143,10 +143,19 @@ async def metadata_search_endpoint(
     return {"status": "ok", "results": results}
 
 @app.post("/upload_embeddings")
-async def upload_embeddings(user_id: str = Depends(get_current_user)):
+async def upload_embeddings(authorization: str = Header(...)):
     try:
         start_time = time.time()
-        supabase_client = SupabaseClient(user_id)
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization header")
+        
+        token = authorization.split(" ")[1]
+        user_id = validate_token(token)
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+            
+        supabase_client = SupabaseClient(access_token=token)
         items = supabase_client.get_all_items()
         logger.info(f"🔍 Starting upload_embeddings for user_id: {user_id}")
         logger.info(f"Processing {len(items)} items")
@@ -170,9 +179,10 @@ async def upload_embeddings(user_id: str = Depends(get_current_user)):
         "status": "ok",
         "timeTaken": time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time)),
         "message": "Upload completed successfully",
-        "totalItems": len(data),
         "failedItems": response["failed"],
-        "failedItemsList": response["failures"]
+        "totalItems": len(data),
+        "failedItemsList": response["failures"],
+        "items": data
     }
 
 @app.get("/health")

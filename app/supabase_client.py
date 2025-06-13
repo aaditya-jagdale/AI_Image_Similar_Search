@@ -29,5 +29,18 @@ class SupabaseClient:
 
     def get_all_items(self) -> list[TextileProduct]:
         response = self.supabase.table("textile_products").select("*").execute()
-        return [TextileProduct(**item) for item in response.data]    
+        return [TextileProduct(**item) for item in response.data]
 
+if __name__ == "__main__":
+    #login with example@
+    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    response = supabase.auth.sign_in_with_password({
+        "email": "aadi@gmail.com",
+        "password": "123456"
+    })
+    access_token = response.session.access_token
+    print(access_token)
+    client = SupabaseClient(access_token)
+    res = client.get_all_items()
+    for item in res:
+        print("Item name: ", item.name)

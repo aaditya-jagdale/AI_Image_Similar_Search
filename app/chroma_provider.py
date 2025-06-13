@@ -41,8 +41,8 @@ def upsert_to_chroma(
     user_id: str,
     data: List[Dict],
     persist_directory: str = "./chroma",
-    image_key: str = "image",
-    id_key: str = "design_no"
+    image_key: str = "image_url",
+    id_key: str = "id"
 ) -> Dict[str, int]:
     client = chromadb.PersistentClient(path=persist_directory)
     collection = client.get_or_create_collection(
@@ -58,7 +58,6 @@ def upsert_to_chroma(
     BATCH_SIZE = 100
 
     try:
-        # Calculate total number of batches for progress bar
         total_batches = (len(data) + BATCH_SIZE - 1) // BATCH_SIZE
         batch_progress = tqdm(total=total_batches, desc="Processing batches", position=0)
 
@@ -179,6 +178,9 @@ def search_images(user_id: str, image_path_or_url: str, top_k: int = 10) -> List
             'distance': results['distances'][0][idx] if 'distances' in results else None
         }
         formatted_results.append(result)
+    
+    # Max allowed distance is 1
+    formatted_results = [result for result in formatted_results if result['distance'] <= 1]
 
     return formatted_results
 # if __name__ == "__main__":
