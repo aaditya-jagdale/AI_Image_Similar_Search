@@ -2,6 +2,7 @@ from supabase import create_client, Client, AsyncClientOptions
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from typing import Optional
 load_dotenv()
 
 
@@ -12,7 +13,7 @@ class TextileProduct(BaseModel):
     name: str
     material: str
     pattern: str
-    type: str
+    type: Optional[str] = None
     gsm: int
     price_per_meter: float
     image_url: str
@@ -30,6 +31,19 @@ class SupabaseClient:
     def get_all_items(self) -> list[TextileProduct]:
         response = self.supabase.table("textile_products").select("*").execute()
         return [TextileProduct(**item) for item in response.data]
+    
+    def insert_item(self, item: dict):
+        response = self.supabase.table("textile_products").insert({
+            "product_id": item["product_id"],
+            "name": item["name"],
+            "material": item["material"],
+            "pattern": item["pattern"],
+            "gsm": item["gsm"],
+            "price_per_meter": item["price_per_meter"],
+            "price_local": item["price_local"],
+            "image_url": item["image_url"],
+        }).execute()
+        return response.data
 
 if __name__ == "__main__":
     #login with example@
@@ -40,7 +54,9 @@ if __name__ == "__main__":
     })
     access_token = response.session.access_token
     print(access_token)
-    client = SupabaseClient(access_token)
-    res = client.get_all_items()
-    for item in res:
-        print("Item name: ", item.name)
+    # client = SupabaseClient(access_token)
+    # res = client.get_all_items()
+    # for item in res:
+    #     print("Item name: ", item.name)
+
+

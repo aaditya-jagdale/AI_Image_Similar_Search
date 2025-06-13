@@ -11,3 +11,5 @@ pdfs copy
 images
 sample_data.json
 app/textile_data.json
+chroma
+upload_data.py
