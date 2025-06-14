@@ -24,7 +24,7 @@ def process_embeddings(self, user_id: str, access_token: str) -> Dict:
         
         # Fetch items
         task_tracker.update_progress(task_id, 0, 0, "Fetching items from database")
-        items = supabase_client.get_all_items()[:40]
+        items = supabase_client.get_all_items()
         
         # Update total items count
         total_items = len(items)
