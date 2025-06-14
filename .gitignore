@@ -13,3 +13,6 @@ sample_data.json
 app/textile_data.json
 chroma
 upload_data.py
+.github/
+**/__pycache__/
+*.py[cod]

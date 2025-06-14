@@ -14,6 +14,7 @@ import requests
 import os
 import tempfile
 import shutil
+from .task_tracker import task_tracker
 
 
 
@@ -42,7 +43,8 @@ def upsert_to_chroma(
     data: List[Dict],
     persist_directory: str = "./chroma",
     image_key: str = "image_url",
-    id_key: str = "id"
+    id_key: str = "id",
+    task_id: str = None
 ) -> Dict[str, int]:
     client = chromadb.PersistentClient(path=persist_directory)
     collection = client.get_or_create_collection(
@@ -55,25 +57,29 @@ def upsert_to_chroma(
     upserted = 0
     failed = 0
     failures = []
-    BATCH_SIZE = 100
-
+    BATCH_SIZE = 32
     try:
         total_batches = (len(data) + BATCH_SIZE - 1) // BATCH_SIZE
         batch_progress = tqdm(total=total_batches, desc="Processing batches", position=0)
-
+        completed_batches = 0
         for i in range(0, len(data), BATCH_SIZE):
             batch = data[i:i + BATCH_SIZE]
             batch_images = []
             batch_ids = []
             batch_metadatas = []
-
             # Download all images in the batch first
+            if task_id:
+                task_tracker.update_progress(
+                    task_id,
+                    i,
+                    len(data),
+                    f"Downloading batch {i//BATCH_SIZE + 1}/{total_batches}"
+                )
             download_progress = tqdm(total=len(batch), desc="Downloading images", position=1, leave=False)
             for item in batch:
                 try:
                     image_path = item[image_key]
                     item_id = str(item[id_key])
-                    
                     if is_url(image_path):
                         # Download URL image to temp directory
                         temp_image_path = os.path.join(temp_dir, f"{item_id}.jpg")
@@ -98,11 +104,16 @@ def upsert_to_chroma(
                     failures.append({"id": item.get(id_key), "error": str(e)})
                 finally:
                     download_progress.update(1)
-            
             download_progress.close()
-
             if batch_images:
                 try:
+                    if task_id:
+                        task_tracker.update_progress(
+                            task_id,
+                            i + len(batch_images),
+                            len(data),
+                            f"Processing embeddings for batch {i//BATCH_SIZE + 1}/{total_batches}"
+                        )
                     # Upsert the batch to ChromaDB
                     collection.upsert(
                         ids=batch_ids,
@@ -115,16 +126,21 @@ def upsert_to_chroma(
                     failed += len(batch_images)
                     for item_id in batch_ids:
                         failures.append({"id": item_id, "error": str(e)})
-
             # Clean up temp directory after each batch
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
                 temp_dir = tempfile.mkdtemp(prefix="chroma_temp_")
-            
             batch_progress.update(1)
-
+            completed_batches += 1
+            # Report batch progress to task_tracker
+            if task_id:
+                task_tracker.update_progress(
+                    task_id,
+                    i + len(batch_images),
+                    len(data),
+                    f"Completed batch {completed_batches}/{total_batches}"
+                )
         batch_progress.close()
-
     finally:
         # Final cleanup of temp directory
         if os.path.exists(temp_dir):
@@ -134,6 +150,8 @@ def upsert_to_chroma(
         "upserted": upserted,
         "failed": failed,
         "failures": failures,
+        "total_batches": total_batches,
+        "completed_batches": completed_batches if 'completed_batches' in locals() else 0
     }
 
 def search_images(user_id: str, image_path_or_url: str, top_k: int = 10) -> List[Dict]:
