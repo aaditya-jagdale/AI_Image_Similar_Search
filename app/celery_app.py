@@ -1,6 +1,5 @@
 from celery import Celery
 import os
-import certifi
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,19 +7,22 @@ load_dotenv()
 UPSTASH_URL = os.getenv("UPSTASH_URL")
 if not UPSTASH_URL or not UPSTASH_URL.startswith("rediss://"):
     raise ValueError("Invalid or missing secure Upstash Redis URL.")
+UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=CERT_NONE"
 
-SSL_CONFIG = {
-    "ssl_cert_reqs": "required",
-    "ssl_ca_certs": certifi.where(),
-}
-
+# Configure Celery with Redis
 celery_app = Celery(
     "textile_search",
     broker=UPSTASH_URL,
     backend=UPSTASH_URL,
     include=["app.tasks"],
-    broker_use_ssl=SSL_CONFIG,
-    backend_use_ssl=SSL_CONFIG,
+    broker_use_ssl={
+        'ssl_cert_reqs': None,
+        'ssl_ca_certs': None
+    },
+    redis_backend_use_ssl={
+        'ssl_cert_reqs': None,
+        'ssl_ca_certs': None
+    }
 )
 
 celery_app.conf.update(
