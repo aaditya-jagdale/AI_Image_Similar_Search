@@ -7,7 +7,8 @@ load_dotenv()
 UPSTASH_URL = os.getenv("UPSTASH_URL")
 if not UPSTASH_URL or not UPSTASH_URL.startswith("rediss://"):
     raise ValueError("Invalid or missing secure Upstash Redis URL.")
-UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=CERT_NONE"
+# UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=optional"
+UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=CERT_REQUIRED"
 
 # Configure Celery with Redis
 celery_app = Celery(
