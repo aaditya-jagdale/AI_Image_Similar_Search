@@ -1,14 +1,23 @@
 from celery import Celery
 import os
 from dotenv import load_dotenv
+import ssl
+import certifi
 
 load_dotenv()
 
 UPSTASH_URL = os.getenv("UPSTASH_URL")
 if not UPSTASH_URL or not UPSTASH_URL.startswith("rediss://"):
     raise ValueError("Invalid or missing secure Upstash Redis URL.")
-# UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=optional"
-UPSTASH_URL = f"{UPSTASH_URL}?ssl_cert_reqs=CERT_REQUIRED"
+
+# Ensure that SSL certificate verification is enforced.
+# Upstash issues certificates signed by a trusted CA, so we only need to point
+# the client to the system CA bundle provided by certifi.
+ssl_options = {
+    "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    "ssl_ca_certs": certifi.where(),
+    "ssl_check_hostname": True,
+}
 
 # Configure Celery with Redis
 celery_app = Celery(
@@ -16,14 +25,8 @@ celery_app = Celery(
     broker=UPSTASH_URL,
     backend=UPSTASH_URL,
     include=["app.tasks"],
-    broker_use_ssl={
-        'ssl_cert_reqs': None,
-        'ssl_ca_certs': None
-    },
-    redis_backend_use_ssl={
-        'ssl_cert_reqs': None,
-        'ssl_ca_certs': None
-    }
+    broker_use_ssl=ssl_options,
+    redis_backend_use_ssl=ssl_options,
 )
 
 celery_app.conf.update(
