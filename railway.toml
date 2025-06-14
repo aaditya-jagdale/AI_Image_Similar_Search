@@ -3,6 +3,7 @@ builder = "nixpacks"
 buildCommand = "pip install -r requirements.txt"
 
 [deploy]
+preDeployCommand = ["PYTHONPATH=$PYTHONPATH:. celery -A app.worker worker --loglevel=INFO"]
 startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
