@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import logging
 from supabase import create_client, Client
 import chromadb
+from app.supabase_client import SupabaseClient
 
 # Routers
 from app.routes.health import router as health_router
@@ -47,6 +48,17 @@ app.include_router(search_router)
 app.include_router(task_status_router)
 app.include_router(upload_embeddings_router)
 app.include_router(celery_status_router)
+
+@app.get("/sample_jwt")
+async def sample_jwt():
+    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    response = supabase.auth.sign_in_with_password({
+        "email": "aadi@gmail.com",
+        "password": "123456"
+    })
+    access_token = response.session.access_token
+    return {"access_token": access_token}
+
 
 if __name__ == "__main__":
     import uvicorn

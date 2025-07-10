@@ -201,6 +201,19 @@ def search_images(user_id: str, image_path_or_url: str, top_k: int = 10) -> List
     formatted_results = [result for result in formatted_results if result['distance'] <= 1]
 
     return formatted_results
+
+def search_textile_data(user_id: str, query: str, top_k: int = 10) -> List[Dict]:
+    """Search for similar textile data in ChromaDB collection.
+    
+    Args:
+        user_id: ID of user performing the search
+        query: Search query
+        top_k: Number of results to return
+
+    Returns:
+        List of dictionaries containing search results with metadata
+    """
+
 # if __name__ == "__main__":
 #     # with open("app/textile_data.json", "r", encoding="utf-8") as f:
 #     #     data: List[dict] = json.load(f)
