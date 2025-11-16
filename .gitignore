@@ -16,3 +16,6 @@ upload_data.py
 .github/
 **/__pycache__/
 *.py[cod]
+
+
+data/
