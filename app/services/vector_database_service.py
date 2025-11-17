@@ -1,14 +1,19 @@
 from agno.vectordb.chroma import ChromaDb
-from app.core.config import CHROMA_DB_NAME, CHROMA_DIR
+from app.core.config import CHROMA_DB_NAME, CHROMA_DIR, GEMINI_API_KEY
 from agno.knowledge.knowledge import Knowledge
+from agno.knowledge.embedder.google import GeminiEmbedder
 
+geminiEmbedder = GeminiEmbedder(
+    api_key=GEMINI_API_KEY,
+)
 
 chromadb = ChromaDb(
     name="textile_designs",
     persistent_client=True,
     description="Image embeddings stored of all the textile designs",
     collection=CHROMA_DB_NAME,
-    persist_directory=CHROMA_DIR,
+    path=CHROMA_DIR,
+    embedder=geminiEmbedder
 )
 
 knowledge = Knowledge(

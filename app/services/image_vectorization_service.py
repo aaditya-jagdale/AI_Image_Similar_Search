@@ -5,8 +5,15 @@ from transformers import CLIPProcessor
 
 class ImageVectorizerONNX:
     def __init__(self, onnx_path: str, model_id: str = "openai/clip-vit-base-patch32"):
-        self.session = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
-        self.processor = CLIPProcessor.from_pretrained(model_id)
+        try:
+            self.session = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
+        except Exception as e:
+            raise RuntimeError(f"Failed to load ONNX model from {onnx_path}: {e}")
+        
+        try:
+            self.processor = CLIPProcessor.from_pretrained(model_id)
+        except Exception as e:
+            raise RuntimeError(f"Failed to load CLIPProcessor from model {model_id}: {e}")
 
     def _load_image(self, path):
         img = Image.open(path)
