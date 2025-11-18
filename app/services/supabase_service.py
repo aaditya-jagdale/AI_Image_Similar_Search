@@ -20,3 +20,11 @@ class SupabaseService:
     def get_all_items(self, limit: int = 100):
         response = self.client.table("products").select("*").limit(limit).execute()
         return response.data
+    
+    def get_items_by_source(self, source_pdf: str | None = None, limit: int = 12):
+        if not source_pdf or source_pdf is None:
+            response = self.client.table("products").select("*").limit(limit).execute()
+            return response.data
+        else :
+            response = self.client.table("products").select("*").eq("source_pdf", source_pdf).limit(limit).execute()
+            return response.data

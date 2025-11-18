@@ -24,7 +24,7 @@ except Exception as e:
 @image_search_router.post("/find_similar")
 async def find_similar_images(
     file: UploadFile = File(...), 
-    top_k: int = 5
+    top_k: int = 8
 ):
     """
     Receives an image, generates an embedding, and returns similar items.

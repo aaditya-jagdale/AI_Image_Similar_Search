@@ -24,3 +24,8 @@ def get_items(id_list: IdsModel):
 def get_all_items(limit: int = 100):
     response = supabaseService.get_all_items(limit)
     return response
+
+@supabase_router.get("/get_items_by_source")
+def get_all_items(source_pdf: str | None = None, limit: int = 12):
+    response = supabaseService.get_items_by_source(source_pdf, limit)
+    return response
