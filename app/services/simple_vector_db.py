@@ -18,16 +18,6 @@ class SimpleVectorDB:
         print(f"ChromaDB service initialized. Collection '{CHROMA_DB_NAME}' ready.")
 
     def add_image(self, embedding: np.ndarray, metadata: Dict[str, Any], id: str):
-        """
-        Adds a single image embedding, metadata, and ID to the collection.
-        
-        Args:
-            embedding: The numpy array (1, D) of the image embedding.
-            metadata: A dictionary of metadata for the image.
-            id: A unique string ID for the image.
-        """
-        # ChromaDB expects a list of embeddings and a list of metadatas/ids.
-        # We convert the (1, D) numpy array to a simple list.
         if embedding.ndim > 1:
             embedding_list = embedding.tolist()[0]
         else:
