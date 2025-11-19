@@ -10,7 +10,7 @@ from app.core.config import IMG_EMBEDDING_MODEL, ONNX_MODEL_PATH
 
 CSV_PATH = "formatted_products_rows.csv"
 MODEL_ID = IMG_EMBEDDING_MODEL
-LIMIT=100
+LIMIT=10000
 
 # --- Helper Function ---
 
