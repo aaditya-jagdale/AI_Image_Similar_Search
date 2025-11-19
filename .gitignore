@@ -22,3 +22,7 @@ data/
 # Ignore local dataset database and large binary blobs
 dataset_db/
 *.sqlite3
+test.ipynb
+dataset_db_multi_angle
+clip_vision_static.onnx.data
+formatted_products_rows.csv

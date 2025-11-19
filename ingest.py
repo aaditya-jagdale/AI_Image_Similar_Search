@@ -8,8 +8,9 @@ from app.services.simple_vector_db import SimpleVectorDB
 from app.core.config import IMG_EMBEDDING_MODEL, ONNX_MODEL_PATH
 
 
-CSV_PATH = "data/formatted_products_rows.csv"
-MODEL_ID = IMG_EMBEDDING_MODEL # "Qdrant/clip-ViT-B-32-vision"
+CSV_PATH = "formatted_products_rows.csv"
+MODEL_ID = IMG_EMBEDDING_MODEL
+LIMIT=100
 
 # --- Helper Function ---
 
@@ -45,7 +46,7 @@ def main():
 
     print("Initializing services...")
     try:
-        vectorizer = ImageVectorizerONNX(onnx_path="clip_vision_static.onnx", model_id=MODEL_ID)
+        vectorizer = ImageVectorizerONNX(onnx_path=ONNX_MODEL_PATH, model_id=MODEL_ID)
     except Exception as e:
         print(f"CRITICAL: Failed to initialize ImageVectorizerONNX. Is ONNX_MODEL_PATH correct?")
         print(f"Error details: {e}")
@@ -57,8 +58,8 @@ def main():
     # Open and read the CSV file
     with open(CSV_PATH, mode='r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
-        
-        for i, row in enumerate(reader):
+        # Limit the number of rows processed for testing
+        for i, row in zip(range(LIMIT), reader):
             print(f"\n--- Processing Row {i+1} ---")
             
             try:
@@ -82,15 +83,20 @@ def main():
 
                 # 3. Generate embedding
                 print(f"  Generating embedding...")
-                embedding = vectorizer.encode_single(local_image_path)
+                all_embeddings = vectorizer.encode_all_angles(local_image_path)
                 
                 # 4. Add to database
                 print(f"  Adding to vector database...")
-                db_service.add_image(
-                    embedding=embedding,
-                    metadata=image_metadata,
-                    id=image_id
-                )
+                count = 0
+                for embedding in all_embeddings:
+                    count += 1
+                    print(f"    Adding embedding for angle {count}...")
+                    db_service.add_image(
+                        embedding=embedding,
+                        metadata=image_metadata,
+                        id=image_id
+                    )
+                
                 
             except Exception as e:
                 print(f"  [Error] Failed to process row {i+1} (ID: {row.get('id')}): {e}")
