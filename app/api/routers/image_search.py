@@ -35,7 +35,7 @@ async def find_similar_images(
     if not vectorizer or not db_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Core services are not available."
+            detail=f"Core services are not available.\n vectorizer: {vectorizer is not None}, db_service: {db_service is not None}"
         )
 
     # Your ImageVectorizerONNX takes a file path, not bytes.
