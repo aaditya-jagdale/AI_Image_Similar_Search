@@ -15,7 +15,7 @@ class SimpleVectorDB:
         self.collection = self.client.get_or_create_collection(
             name=CHROMA_DB_NAME
         )
-        print(f"ChromaDB service initialized. Collection '{CHROMA_DB_NAME}' ready.")
+        print(f"ChromaDB service initialized. Collection ready. db_name: '{CHROMA_DB_NAME}' db_path: '{CHROMA_DIR}'")
 
     def add_image(self, embedding: np.ndarray, metadata: Dict[str, Any], id: str):
         if embedding.ndim > 1:
@@ -36,16 +36,6 @@ class SimpleVectorDB:
             print(f"Error adding image {id}: {e}")
 
     def query_image(self, query_embedding: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Queries the collection for the most similar image embeddings.
-        
-        Args:
-            query_embedding: The numpy array (1, D) of the query image embedding.
-            top_k: The number of similar results to return.
-            
-        Returns:
-            A list of dictionaries containing search results.
-        """
         if query_embedding.ndim > 1:
             query_list = query_embedding.tolist()[0]
         else:

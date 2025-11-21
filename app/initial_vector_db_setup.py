@@ -1,4 +1,3 @@
-from fastapi import APIRouter
 from app.core.config import CHROMA_DB_NAME, CHROMA_DIR, SENTENCE_TRANSFORMER_MODEL, ONNX_MODEL_PATH 
 from app.services.image_vectorization_service import ImageVectorizerONNX
 from app.models.add_document_models import AddDocumentModels
