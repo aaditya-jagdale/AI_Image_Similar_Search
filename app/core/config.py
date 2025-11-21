@@ -9,9 +9,6 @@ GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 GEMINI_MODEL = "gemini-flash-lite-latest"
 IMG_EMBEDDING_MODEL = "openai/clip-vit-base-patch32"
 
-# ONNX model path: prefer data/clip_vision_static.onnx inside the repo if present,
-# otherwise fall back to environment or the plain filename. This avoids failing
-# to load the model when code runs from the repository root.
 _ROOT = Path(__file__).resolve().parents[2]
 _default_data_model = _ROOT / "data" / "clip_vision_static.onnx"
 if _default_data_model.exists():
