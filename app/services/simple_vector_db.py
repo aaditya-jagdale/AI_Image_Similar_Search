@@ -1,7 +1,22 @@
 import chromadb
 from app.core.config import CHROMA_DB_NAME, CHROMA_DIR
 import numpy as np
+from agno.knowledge import Knowledge
+from agno.vectordb.upstashdb import UpstashVectorDb
 from typing import List, Dict, Any
+import os
+
+vector_db = UpstashVectorDb(
+    url=os.getenv("UPSTASH_VECTOR_REST_URL"),
+    token=os.getenv("UPSTASH_VECTOR_REST_TOKEN"),
+)
+
+# Initialize Upstash DB
+knowledge = Knowledge(
+    name="Basic SDK Knowledge Base",
+    description="Agno 2.0 Knowledge Implementation with Upstash Vector DB",
+    vector_db=vector_db,
+)
 
 class SimpleVectorDB:
     def __init__(self):
@@ -48,3 +63,15 @@ class SimpleVectorDB:
         )
         
         return results
+
+
+class UpstashVectorDataService:
+    def __init__(self):
+        pass
+
+    def add_item(self, image: str, metadata: Dict[str, Any], id: str):
+        knowledge.add_content(
+            url=image,
+            metadata=metadata,
+            id=id,
+        )
