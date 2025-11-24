@@ -40,5 +40,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#Simple base endpoint to check if the server is running
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
+
 # Prefix '/api' endpoint
 app.include_router(router=router, prefix="/api")
