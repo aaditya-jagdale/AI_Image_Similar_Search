@@ -11,7 +11,6 @@ from app.startup.services import (
 
 image_search_router = APIRouter()
 
-
 @image_search_router.post("/find_similar")
 async def find_similar_images(
     file: UploadFile = File(...), 
@@ -52,10 +51,9 @@ async def find_similar_images(
             shutil.copyfileobj(file.file, tmp_file)
             tmp_file_path = tmp_file.name
 
-        # Load and convert image to RGB
+        # Load the image as PIL; downstream embedding call handles RGB conversion + preprocessing
         try:
             image = Image.open(tmp_file_path)
-            image = image.convert("RGB")
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

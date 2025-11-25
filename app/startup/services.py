@@ -3,6 +3,7 @@ Service initialization module.
 All heavy services (models, databases, etc.) are initialized here at server startup.
 """
 import os
+import random
 import numpy as np
 import torch
 from typing import Optional
@@ -47,6 +48,24 @@ def initialize_clip_model() -> tuple[Optional[CLIPModel], Optional[transforms.Co
     global clip_model, clip_preprocess
     
     try:
+        # Configure deterministic behavior for reproducible embeddings across platforms
+        seed = 42
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        
+        # Set PyTorch to use deterministic algorithms
+        torch.use_deterministic_algorithms(True, warn_only=True)
+        
+        # Configure CUDA for deterministic behavior if GPU is available
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            # Disable CUDA benchmarking for deterministic behavior
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        
+        logger.info("Deterministic mode enabled for reproducible embeddings (seed=42)")
         logger.info("Loading CLIP model (this may take a moment)...")
         clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         clip_model.eval()  # Set to evaluation mode
@@ -69,19 +88,7 @@ def initialize_clip_model() -> tuple[Optional[CLIPModel], Optional[transforms.Co
 
 
 def get_image_embedding(image: Image.Image) -> np.ndarray:
-    """
-    Generate embedding for an image using the pre-loaded CLIP model.
-    
-    Args:
-        image: PIL Image object (can be in any mode - will be converted to RGB)
-        
-    Returns:
-        numpy array of the embedding
-        
-    Raises:
-        RuntimeError: If CLIP model is not initialized
-        ValueError: If image cannot be converted to RGB
-    """
+
     if clip_model is None or clip_preprocess is None:
         raise RuntimeError("CLIP model not initialized. Please check server startup logs.")
     
