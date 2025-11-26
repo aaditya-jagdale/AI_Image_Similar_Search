@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from collections import defaultdict
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from PIL import Image
 from app.startup.services import (
@@ -60,28 +61,68 @@ async def find_similar_images(
                 detail=f"Invalid image file: {str(e)}"
             )
         
-        # Generate embedding using pre-loaded CLIP model
-        vector = get_image_embedding(image)
+        # Rotations for multi-query approach: 0, 35, and 90 degrees
+        rotation_angles = [0, 35, 90]
         
-        # Query Upstash vector database
-        results = index.query(
-            vector=vector.tolist(),
-            top_k=top_k,
-            include_metadata=True
-        )
+        # Dictionary to track results: {id: {'count': int, 'scores': [float], 'metadata': dict}}
+        result_frequency = defaultdict(lambda: {'count': 0, 'scores': [], 'metadata': None})
         
-        # Format results
-        formatted_results = []
-        for r in results:
-            formatted_results.append({
-                "id": r.id,
-                "score": r.score,
-                "metadata": r.metadata
+        # Query 3 times with different rotations
+        for angle in rotation_angles:
+            # Rotate the image
+            if angle == 0:
+                rotated_image = image
+            else:
+                rotated_image = image.rotate(angle, expand=True)
+            
+            # Generate embedding for rotated image
+            vector = get_image_embedding(rotated_image)
+            
+            # Query Upstash vector database
+            query_results = index.query(
+                vector=vector.tolist(),
+                top_k=top_k,
+                include_metadata=True
+            )
+            
+            # Track results by frequency
+            for r in query_results:
+                result_frequency[r.id]['count'] += 1
+                result_frequency[r.id]['scores'].append(r.score)
+                # Store metadata (will be overwritten but should be same for same id)
+                if result_frequency[r.id]['metadata'] is None:
+                    result_frequency[r.id]['metadata'] = r.metadata
+        
+        # Sort results by frequency (descending), then by average score (descending)
+        sorted_results = []
+        for result_id, data in result_frequency.items():
+            avg_score = sum(data['scores']) / len(data['scores']) if data['scores'] else 0.0
+            sorted_results.append({
+                'id': result_id,
+                'frequency': data['count'],
+                'avg_score': avg_score,
+                'metadata': data['metadata']
+            })
+        
+        # Sort by frequency (descending), then by average score (descending)
+        sorted_results.sort(key=lambda x: (x['frequency'], x['avg_score']), reverse=True)
+        
+        # Take top_k results
+        formatted_results = sorted_results[:top_k]
+        
+        # Format final results (remove frequency and avg_score from response, keep for internal use)
+        final_results = []
+        for r in formatted_results:
+            final_results.append({
+                "id": r['id'],
+                "score": r['avg_score'],
+                "frequency": r['frequency'],
+                "metadata": r['metadata']
             })
         
         return {
-            "message": f"Found {len(formatted_results)} similar images.",
-            "results": formatted_results
+            "message": f"Found {len(final_results)} similar images using multi-query approach.",
+            "results": final_results
         }
 
     except HTTPException:
