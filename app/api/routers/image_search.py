@@ -119,11 +119,15 @@ async def find_similar_images(
                 "frequency": r['frequency'],
                 "metadata": r['metadata']
             })
-        
-        return {
+
+        output = {
             "message": f"Found {len(final_results)} similar images using multi-query approach.",
             "results": final_results
         }
+
+        print(output)
+        
+        return output
 
     except HTTPException:
         # Re-raise HTTP exceptions
