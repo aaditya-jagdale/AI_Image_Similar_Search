@@ -12,7 +12,6 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # Assuming 'app.core.console' is a custom module for logging
-# We'll create simple print fallbacks if it can't be imported
 try:
     from app.core.console import success, error, info
 except ImportError:
@@ -26,31 +25,17 @@ PDF_DIRECTORY = Path("data/pdfs")
 OUTPUT_DIR = Path("data/output")
 IMAGE_DIR = OUTPUT_DIR / "images"
 SKIPPED_IMAGE_DIR = OUTPUT_DIR / "skipped_images"
-# NEW: Directory for images that are likely placeholders or "default images"
-SUSPICIOUS_IMAGE_DIR = OUTPUT_DIR / "suspicious_images"
 MASTER_JSON_FILE = OUTPUT_DIR / "pdf_extracted_data.json"
-LIMIT = 100  # Set to None to process all files, or a number to limit
-# Toggle GSM extraction: True = extract GSM field, False = ignore GSM field
-EXTRACT_GSM = True
+LIMIT = None  # Set to None to process all files, or a number to limit
 
-# NEW: Minimum area (width * height) for an image to be considered "valid"
-# Anything smaller will be flagged as suspicious. 50000 = ~224x224 pixels
-MIN_IMAGE_AREA = 50000  
-
-# --- REGEX PATTERNS (compiled for efficiency) ---
-# (No changes to regex)
-RE_DESIGN_NO = re.compile(r"Design no:\s*\n\s*([^\n]+)", re.IGNORECASE | re.DOTALL)
-RE_WIDTH = re.compile(r"Width:\s*\n\s*([^\n]+)", re.IGNORECASE | re.DOTALL)
-RE_STOCK = re.compile(r"Stock:\s*\n\s*([^\n]+)", re.IGNORECASE | re.DOTALL)
-RE_GSM = re.compile(r"GSM:\s*\n\s*([^\n]*)", re.IGNORECASE | re.DOTALL)
-
+# Minimum image area to consider valid (50000 = ~224x224 pixels)
+MIN_IMAGE_AREA = 50000
 
 def setup_directories():
     """Ensures all necessary output directories exist."""
     OUTPUT_DIR.mkdir(exist_ok=True)
     IMAGE_DIR.mkdir(exist_ok=True)
     SKIPPED_IMAGE_DIR.mkdir(exist_ok=True)
-    SUSPICIOUS_IMAGE_DIR.mkdir(exist_ok=True)  # NEW: Create suspicious dir
     # Ensure the master JSON file exists
     if not MASTER_JSON_FILE.exists():
         save_master_data([])
@@ -71,39 +56,149 @@ def save_master_data(data):
         json.dump(data, f, indent=4)
 
 
-def clean_value(value):
-    """Helper function to strip whitespace and remove extra characters."""
+def clean_text_value(value):
+    """
+    Clean text values by removing extra whitespace and common OCR artifacts.
+    Preserves the original format (like 61" for width).
+    """
     if value:
-        # Remove common OCR artifacts like '$'
         return value.strip().replace('$', '')
     return None
 
 
-def clean_numeric_value(value):
-    """Helper function to extract and convert numeric values to integers."""
-    if value:
-        # Remove common OCR artifacts and non-numeric characters except digits
-        cleaned = value.strip().replace('$', '').replace('"', '').replace("'", '')
-        # Extract only digits
-        digits = ''.join(filter(str.isdigit, cleaned))
-        if digits:
-            return int(digits)
-    return None
-
-
-def get_regex_match(pattern, text):
-    """Finds a regex match and returns the cleaned group 1, or None."""
-    match = pattern.search(text)
-    if match:
-        return clean_value(match.group(1))
-    return None
+def extract_numeric_value(value):
+    """
+    Extract numeric value from text.
+    Returns integer if found, otherwise 0.
+    """
+    if not value:
+        return 0
+    
+    # Remove common OCR artifacts
+    cleaned = value.strip().replace('$', '').replace('"', '').replace("'", '')
+    # Extract only digits
+    digits = ''.join(filter(str.isdigit, cleaned))
+    
+    if digits:
+        return int(digits)
+    return 0
 
 
 def sanitize_filename(name):
     """Replaces characters that are unsafe for filenames."""
     if not name:
         return None
-    return name.replace('/', '-').replace('\\', '-')
+    return name.replace('/', '-').replace('\\', '-').replace(' ', '_')
+
+
+def extract_data_from_page(text):
+    """
+    Extracts Design no, Width, Stock, and GSM from page text.
+    
+    Returns:
+        dict: Contains design_no, width, stock, gsm or None if extraction fails
+    """
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    
+    # Find label positions
+    label_indices = {}
+    for i, line in enumerate(lines):
+        line_lower = line.lower()
+        if 'design no:' in line_lower or line == 'Design no:':
+            label_indices['design_no'] = i
+        elif 'width:' in line_lower or line == 'Width:':
+            label_indices['width'] = i
+        elif 'stock:' in line_lower or line == 'Stock:':
+            label_indices['stock'] = i
+        elif 'gsm:' in line_lower or line == 'GSM:':
+            label_indices['gsm'] = i
+    
+    # Need at least Design no, Width, and Stock
+    if len(label_indices) < 3:
+        return None
+    
+    # Find where values start (after the last label)
+    last_label_idx = max(label_indices.values())
+    values_start_idx = last_label_idx + 1
+    
+    # Check if we have enough lines for values
+    if values_start_idx >= len(lines):
+        return None
+    
+    # Extract values based on label order
+    design_no = None
+    width = None
+    stock = None
+    gsm = 0  # Default to 0 if missing
+    
+    # Sort labels by their index to get the correct order
+    sorted_labels = sorted(label_indices.items(), key=lambda x: x[1])
+    
+    # Extract values in order
+    for idx, (label_name, label_idx) in enumerate(sorted_labels):
+        value_idx = values_start_idx + idx
+        if value_idx < len(lines):
+            value = lines[value_idx]
+            
+            if label_name == 'design_no':
+                design_no = clean_text_value(value)
+            elif label_name == 'width':
+                width = clean_text_value(value)  # Keep as text with "
+            elif label_name == 'stock':
+                stock = extract_numeric_value(value)
+            elif label_name == 'gsm':
+                gsm = extract_numeric_value(value)
+    
+    # If GSM wasn't found in labels, try to get it from the value after stock
+    if 'gsm' not in label_indices and values_start_idx + 3 < len(lines):
+        gsm = extract_numeric_value(lines[values_start_idx + 3])
+    
+    if not design_no:
+        return None
+    
+    return {
+        'design_no': design_no,
+        'width': width,
+        'stock': stock,
+        'gsm': gsm
+    }
+
+
+def extract_largest_image(page, doc):
+    """
+    Extracts the largest image from a page.
+    
+    Returns:
+        tuple: (image_bytes, image_ext, area) or (None, None, 0) if no valid image
+    """
+    image_list = page.get_images(full=True)
+    
+    if not image_list:
+        return None, None, 0
+    
+    largest_image_info = None
+    max_area = 0
+    
+    # Find the largest image by area
+    for img_info in image_list:
+        width = img_info[2]
+        height = img_info[3]
+        area = width * height
+        
+        if area > max_area:
+            max_area = area
+            largest_image_info = img_info
+    
+    if not largest_image_info or max_area < MIN_IMAGE_AREA:
+        return None, None, max_area
+    
+    try:
+        xref = largest_image_info[0]
+        base_image = doc.extract_image(xref)
+        return base_image["image"], base_image["ext"], max_area
+    except Exception as e:
+        error(f"Error extracting image: {e}")
+        return None, None, max_area
 
 
 def process_pdf(pdf_path):
@@ -118,7 +213,6 @@ def process_pdf(pdf_path):
     """
     info(f"Processing {pdf_path.name}...")
     new_entries = []
-    pdf_filename_stem = pdf_path.stem  # e.g., "CHAMBRAY"
 
     try:
         doc = fitz.open(pdf_path)
@@ -131,134 +225,56 @@ def process_pdf(pdf_path):
         page = doc.load_page(page_num)
         text = page.get_text()
 
-        # --- Text Extraction Logic (Unchanged) ---
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
+        # Extract text data
+        data = extract_data_from_page(text)
         
-        design_no = None
-        width = None
-        stock = None
-        gsm = None
-        
-        label_indices = {}
-        for i, line in enumerate(lines):
-            if line == 'Design no:' or line.startswith('Design no:'):
-                label_indices['design_no'] = i
-            elif line == 'Width:' or line.startswith('Width:'):
-                label_indices['width'] = i
-            elif line == 'Stock:' or line.startswith('Stock:'):
-                label_indices['stock'] = i
-            elif (line == 'GSM:' or line.startswith('GSM:')) and EXTRACT_GSM:
-                label_indices['gsm'] = i
-        
-        required_labels = 4 if EXTRACT_GSM else 3
-        
-        if len(label_indices) == required_labels:
-            last_label_idx = max(label_indices.values())
-            values_start_idx = last_label_idx + 1
+        if not data:
+            info(f"  Skipping page {page_num + 1} (no valid data found)")
             
-            if EXTRACT_GSM:
-                if values_start_idx + 3 < len(lines):
-                    design_no = clean_value(lines[values_start_idx])
-                    width = clean_numeric_value(lines[values_start_idx + 1])
-                    stock = clean_numeric_value(lines[values_start_idx + 2])
-                    gsm = clean_numeric_value(lines[values_start_idx + 3])
-            else:
-                if values_start_idx + 2 < len(lines):
-                    design_no = clean_value(lines[values_start_idx])
-                    width = clean_numeric_value(lines[values_start_idx + 1])
-                    stock = clean_numeric_value(lines[values_start_idx + 2])
-        
-        if not design_no:
-            info(f"  Skipping page {page_num + 1} (no Design No. found) - saving image to skipped folder.")
-            
-            # (Unchanged logic for skipped pages)
-            image_list = page.get_images(full=True)
-            if image_list:
-                try:
-                    xref = image_list[0][0]
-                    base_image = doc.extract_image(xref)
-                    image_bytes = base_image["image"]
-                    image_ext = base_image["ext"]
-                    image_filename = f"{pdf_filename_stem}_page{page_num + 1}.{image_ext}"
-                    image_save_path = SKIPPED_IMAGE_DIR / image_filename
-                    with open(image_save_path, "wb") as img_file:
-                        img_file.write(image_bytes)
-                    success(f"    → Saved skipped image: {image_filename}")
-                except Exception as e:
-                    error(f"    Error extracting image from skipped page {page_num + 1}: {e}")
+            # Save image from skipped page
+            image_bytes, image_ext, area = extract_largest_image(page, doc)
+            if image_bytes:
+                image_filename = f"{pdf_filename_stem}_page{page_num + 1}.{image_ext}"
+                image_save_path = SKIPPED_IMAGE_DIR / image_filename
+                with open(image_save_path, "wb") as img_file:
+                    img_file.write(image_bytes)
+                success(f"    → Saved skipped image: {image_filename}")
             
             continue
 
-        # --- NEW Image Extraction Logic ---
+        # Extract image
         image_path_str = None
-        image_status = "no_image_found_on_page" # Default status
+        image_status = "no_image_found"
         
-        image_list = page.get_images(full=True)
+        image_bytes, image_ext, area = extract_largest_image(page, doc)
         
-        if image_list:
-            largest_image_info = None
-            max_area = 0
+        if image_bytes:
+            safe_design_no = sanitize_filename(data['design_no'])
+            image_filename = f"{safe_design_no}.{image_ext}"
+            image_save_path = IMAGE_DIR / image_filename
             
-            # Loop through all images to find the largest one
-            for img_info in image_list:
-                # img_info is [xref, smask, width, height, ...]
-                width = img_info[2]
-                height = img_info[3]
-                area = width * height
-                
-                if area > max_area:
-                    max_area = area
-                    largest_image_info = img_info
+            with open(image_save_path, "wb") as img_file:
+                img_file.write(image_bytes)
             
-            if largest_image_info:
-                try:
-                    xref = largest_image_info[0]
-                    base_image = doc.extract_image(xref)
-                    image_bytes = base_image["image"]
-                    image_ext = base_image["ext"]
-
-                    safe_design_no = sanitize_filename(design_no)
-                    image_filename = f"{pdf_filename_stem}_{safe_design_no}.{image_ext}"
-                    
-                    # Check if the largest image is still too small
-                    if max_area < MIN_IMAGE_AREA:
-                        # This is likely a "default image" or placeholder
-                        image_save_path = SUSPICIOUS_IMAGE_DIR / image_filename
-                        image_status = f"suspicious_small_image (Area: {max_area})"
-                        info(f"  Found small image for {design_no}, saving to suspicious folder.")
-                    else:
-                        # This is a good image
-                        image_save_path = IMAGE_DIR / image_filename
-                        image_status = f"extracted (Area: {max_area})"
-                    
-                    # Save the image
-                    with open(image_save_path, "wb") as img_file:
-                        img_file.write(image_bytes)
-                    
-                    image_path_str = str(image_save_path.relative_to(OUTPUT_DIR))
-
-                except Exception as e:
-                    error(f"  Error extracting largest image on page {page_num + 1}: {e}")
-                    image_status = f"extraction_error: {e}"
-            else:
-                image_status = "no_image_found_in_list"
+            image_path_str = str(image_save_path.relative_to(OUTPUT_DIR))
+            image_status = f"extracted (Area: {area})"
+            success(f"  Extracted image: {image_filename}")
+        elif area > 0:
+            image_status = f"image_too_small (Area: {area})"
         
-        # Create the data object for this page
+        # Create entry
         entry = {
             "source_pdf": pdf_path.name,
-            "design_no": design_no,
-            "width": width,
-            "stock": stock,
+            "design_no": data['design_no'],
+            "width": data['width'],
+            "stock": data['stock'],
+            "gsm": data['gsm'],
             "image_path": image_path_str,
-            "image_status": image_status  # NEW: Add status field
+            "image_status": image_status
         }
         
-        if EXTRACT_GSM:
-            entry["gsm"] = gsm
-            
         new_entries.append(entry)
-        if design_no:
-             success(f"  Extracted: {design_no} (Image: {image_status})")
+        success(f"  Extracted: {data['design_no']} | Width: {data['width']} | Stock: {data['stock']} | GSM: {data['gsm']}")
 
     doc.close()
     return new_entries
@@ -271,7 +287,7 @@ def main():
     pdf_files = list(PDF_DIRECTORY.glob("*.pdf"))
     if not pdf_files:
         error(f"No PDF files found in {PDF_DIRECTORY}. Exiting.")
-        info("Please add your PDFs (like CHAMBRAY.pdf) to that folder.")
+        info("Please add your PDFs to that folder.")
         return
 
     master_data = load_master_data()
@@ -302,7 +318,7 @@ def main():
     success(f"Master data saved to {MASTER_JSON_FILE}")
     success(f"Images saved to {IMAGE_DIR}")
     success(f"Skipped page images saved to {SKIPPED_IMAGE_DIR}")
-    success(f"Suspicious/Default images saved to {SUSPICIOUS_IMAGE_DIR}")
+    info(f"Total entries: {len(master_data)}")
 
 
 if __name__ == "__main__":

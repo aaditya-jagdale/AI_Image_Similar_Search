@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric Visual Search Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .upload-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 20px;
+        }
+        .results-section {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        .thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        #preview {
+            max-width: 200px;
+            display: none;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fabric Visual Search - API Tester</h1>
+    
+    <div class="upload-section">
+        <h3>Search by Image</h3>
+        <div style="margin-bottom: 10px;">
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="threshold">Min Similarity (0.0 - 1.0):</label>
+            <input type="number" id="threshold" step="0.05" min="0" max="1" value="0.2">
+        </div>
+        <button id="searchBtn">Search Similar Fabrics</button>
+        <div id="status" class="status"></div>
+        <img id="preview" alt="Preview">
+    </div>
+
+    <div class="results-section">
+        <h3>Search Results</h3>
+        <div id="resultsInfo"></div>
+        <table id="resultsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Design No</th>
+                    <th>Similarity</th>
+                    <th>GSM</th>
+                    <th>Width</th>
+                    <th>Stock</th>
+                    <th>Source PDF</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+                <!-- Results will be injected here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const statusDiv = document.getElementById('status');
+    const resultsTable = document.getElementById('resultsTable');
+    const resultsBody = document.getElementById('resultsBody');
+    const resultsInfo = document.getElementById('resultsInfo');
+    const previewImg = document.getElementById('preview');
+
+    const API_BASE_URL = 'http://localhost:8000';
+
+    const thresholdInput = document.getElementById('threshold');
+
+    fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    searchBtn.onclick = async () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Please select a file first');
+            return;
+        }
+
+        const threshold = parseFloat(thresholdInput.value) || 0.2;
+
+        statusDiv.innerText = 'Converting image and searching...';
+        statusDiv.className = 'status';
+        resultsTable.style.display = 'none';
+        resultsBody.innerHTML = '';
+        resultsInfo.innerText = '';
+
+        try {
+            // Convert to base64
+            const base64Image = await toBase64(file);
+            
+            // Call API
+            const response = await fetch(`${API_BASE_URL}/api/v1/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image: base64Image,
+                    top_k: 10,
+                    min_similarity: threshold
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Search failed');
+            }
+
+            displayResults(data);
+            statusDiv.innerText = 'Search completed successfully!';
+            statusDiv.className = 'status success';
+
+        } catch (error) {
+            console.error(error);
+            statusDiv.innerText = 'Error: ' + error.message;
+            statusDiv.className = 'status error';
+        }
+    };
+
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    function displayResults(data) {
+        const results = data.results || [];
+        resultsInfo.innerText = `Found ${data.total_found} results in ${data.processing_time_ms}ms`;
+
+        if (results.length === 0) {
+            resultsBody.innerHTML = '<tr><td colspan="7">No matches found.</td></tr>';
+            resultsTable.style.display = 'table';
+            return;
+        }
+
+        results.forEach(item => {
+            const row = document.createElement('tr');
+            
+            // Image URL - adjusted to handle local path from API
+            // The API serves images at /images/{filename}
+            // item.image_path is likely something like "images/filename.jpg" 
+            // but the mount point is /images
+            const imgPath = item.image_path.startsWith('images/') 
+                ? item.image_path.replace('images/', '') 
+                : item.image_path;
+            
+            const imgUrl = `${API_BASE_URL}/images/${imgPath}`;
+
+            row.innerHTML = `
+                <td><img src="${imgUrl}" class="thumbnail" onerror="this.src='https://via.placeholder.com/100?text=No+Image'"></td>
+                <td><strong>${item.design_no}</strong></td>
+                <td>${(item.similarity_score * 100).toFixed(2)}%</td>
+                <td>${item.gsm || '-'}</td>
+                <td>${item.width || '-'}</td>
+                <td>${item.stock || '-'}</td>
+                <td><small>${item.source_pdf || '-'}</small></td>
+            `;
+            resultsBody.appendChild(row);
+        });
+
+        resultsTable.style.display = 'table';
+    }
+</script>
+
+</body>
+</html>
