@@ -26,7 +26,7 @@ OUTPUT_DIR = Path("data/output")
 IMAGE_DIR = OUTPUT_DIR / "images"
 SKIPPED_IMAGE_DIR = OUTPUT_DIR / "skipped_images"
 MASTER_JSON_FILE = OUTPUT_DIR / "pdf_extracted_data.json"
-LIMIT = None  # Set to None to process all files, or a number to limit
+LIMIT = 10  # Set to None to process all files, or a number to limit
 
 # Minimum image area to consider valid (50000 = ~224x224 pixels)
 MIN_IMAGE_AREA = 50000

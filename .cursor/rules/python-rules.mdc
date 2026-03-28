@@ -10,7 +10,7 @@ This document defines the project rules and coding standards that guide AI-assis
 ---
 
 ## 📌 Project Context
-This project is focused on building a production-ready AI-powered textile search system. Users can upload textile images, and the system returns visually similar products from a database using OpenAI CLIP model + FAISS indexing.
+This project is focused on building a production-ready AI-powered textile search system. Users can upload textile images, and the system returns visually similar products from a database using OpenAI RESNET model + FAISS indexing.
 
 - **Primary Tech Stack:** Python, Torch, Hugging Face, FAISS, PIL, Supabase/PostgreSQL
 - **Code Purpose:** Ingestion pipeline, vector indexing, image search API, user-level access control

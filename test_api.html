@@ -3,228 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabric Visual Search Tester</title>
+    <title>Image search API test</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+        body { font-family: system-ui, sans-serif; max-width: 56rem; margin: 1rem auto; padding: 0 1rem; color: #1a1a1a; }
+        .err { color: #c00; }
+        .ok { color: #060; }
+        .query-row { display: flex; gap: 1.25rem; align-items: flex-start; margin: 1rem 0; flex-wrap: wrap; }
+        .query-row img { max-width: 12rem; max-height: 12rem; object-fit: contain; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+        .query-row .placeholder { width: 12rem; height: 8rem; border: 1px dashed #ccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 0.85rem; }
+        h2 { font-size: 1.1rem; margin: 1.5rem 0 0.75rem; font-weight: 600; }
+        .results { display: flex; flex-direction: column; gap: 1rem; }
+        .card {
+            display: flex; gap: 1.25rem; align-items: flex-start;
+            padding: 1rem; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        .card img.thumb {
+            width: 10rem; height: 10rem; object-fit: cover; border-radius: 6px; background: #f0f0f0; flex-shrink: 0;
         }
-        .upload-section {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 20px;
-        }
-        .results-section {
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f8f8;
-        }
-        .thumbnail {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .status {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-        }
-        .success {
-            color: green;
-        }
-        #preview {
-            max-width: 200px;
-            display: none;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-        }
+        .card .details { flex: 1; min-width: 0; }
+        .card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 1rem; font-size: 0.9rem; }
+        .card dt { color: #555; font-weight: 500; }
+        .card dd { margin: 0; word-break: break-word; }
+        .card .rank { font-size: 0.75rem; color: #888; margin-bottom: 0.5rem; }
+        .empty { color: #666; padding: 1rem 0; }
     </style>
 </head>
 <body>
+    <h1>Image search</h1>
+    <p>Base: <code id="base"></code> — <span id="health"></span></p>
 
-<div class="container">
-    <h1>Fabric Visual Search - API Tester</h1>
-    
-    <div class="upload-section">
-        <h3>Search by Image</h3>
-        <div style="margin-bottom: 10px;">
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
-        <div style="margin-bottom: 10px;">
-            <label for="threshold">Min Similarity (0.0 - 1.0):</label>
-            <input type="number" id="threshold" step="0.05" min="0" max="1" value="0.2">
-        </div>
-        <button id="searchBtn">Search Similar Fabrics</button>
-        <div id="status" class="status"></div>
-        <img id="preview" alt="Preview">
+    <p>
+        <input type="file" id="file" accept="image/*">
+        <button type="button" id="go">Search</button>
+    </p>
+    <p id="msg"></p>
+
+    <h2>Your image</h2>
+    <div class="query-row">
+        <div id="queryWrap"><div class="placeholder">No file selected</div></div>
     </div>
 
-    <div class="results-section">
-        <h3>Search Results</h3>
-        <div id="resultsInfo"></div>
-        <table id="resultsTable" style="display: none;">
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Design No</th>
-                    <th>Similarity</th>
-                    <th>GSM</th>
-                    <th>Width</th>
-                    <th>Stock</th>
-                    <th>Source PDF</th>
-                </tr>
-            </thead>
-            <tbody id="resultsBody">
-                <!-- Results will be injected here -->
-            </tbody>
-        </table>
-    </div>
-</div>
+    <h2>Similar items</h2>
+    <div id="results" class="results"></div>
 
-<script>
-    const fileInput = document.getElementById('fileInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const statusDiv = document.getElementById('status');
-    const resultsTable = document.getElementById('resultsTable');
-    const resultsBody = document.getElementById('resultsBody');
-    const resultsInfo = document.getElementById('resultsInfo');
-    const previewImg = document.getElementById('preview');
+    <script>
+        const API_BASE = (location.protocol === 'file:') ? 'http://127.0.0.1:8000' : location.origin;
+        document.getElementById('base').textContent = API_BASE;
 
-    const API_BASE_URL = 'http://localhost:8000';
+        const fileInput = document.getElementById('file');
+        const queryWrap = document.getElementById('queryWrap');
 
-    const thresholdInput = document.getElementById('threshold');
+        fileInput.addEventListener('change', () => {
+            const f = fileInput.files[0];
+            queryWrap.innerHTML = '';
+            if (!f) {
+                queryWrap.innerHTML = '<div class="placeholder">No file selected</div>';
+                return;
+            }
+            const img = document.createElement('img');
+            img.alt = 'Query';
+            img.src = URL.createObjectURL(f);
+            queryWrap.appendChild(img);
+        });
 
-    fileInput.onchange = () => {
-        const file = fileInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    searchBtn.onclick = async () => {
-        const file = fileInput.files[0];
-        if (!file) {
-            alert('Please select a file first');
-            return;
+        function mediaUrl(imagePath) {
+            if (imagePath == null || imagePath === '') return null;
+            const clean = String(imagePath).replace(/^\/+/, '');
+            return API_BASE + '/media/' + clean.split('/').map(encodeURIComponent).join('/');
         }
 
-        const threshold = parseFloat(thresholdInput.value) || 0.2;
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s == null ? '' : String(s);
+            return d.innerHTML;
+        }
 
-        statusDiv.innerText = 'Converting image and searching...';
-        statusDiv.className = 'status';
-        resultsTable.style.display = 'none';
-        resultsBody.innerHTML = '';
-        resultsInfo.innerText = '';
+        function formatDistance(d) {
+            if (d == null || d === '') return '—';
+            const n = Number(d);
+            return Number.isFinite(n) ? n.toFixed(4) : esc(d);
+        }
 
-        try {
-            // Convert to base64
-            const base64Image = await toBase64(file);
-            
-            // Call API
-            const response = await fetch(`${API_BASE_URL}/api/v1/search`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    image: base64Image,
-                    top_k: 10,
-                    min_similarity: threshold
-                })
-            });
+        /** Ordered labels for known metadata keys; rest appended alphabetically */
+        const META_ORDER = ['design_no', 'gsm', 'width', 'stock', 'source_pdf', 'image_path'];
 
-            const data = await response.json();
+        function renderMetaRows(meta) {
+            const m = meta && typeof meta === 'object' ? meta : {};
+            const seen = new Set();
+            const rows = [];
 
-            if (!response.ok) {
-                throw new Error(data.detail || 'Search failed');
+            function addRow(key, label) {
+                if (!(key in m) || m[key] === undefined || m[key] === null) return;
+                seen.add(key);
+                rows.push({ key, label: label || key, value: m[key] });
             }
 
-            displayResults(data);
-            statusDiv.innerText = 'Search completed successfully!';
-            statusDiv.className = 'status success';
+            META_ORDER.forEach((k) => {
+                const labels = { design_no: 'Design no.', gsm: 'GSM', width: 'Width', stock: 'Stock', source_pdf: 'Source PDF'};
+                addRow(k, labels[k] || k);
+            });
 
-        } catch (error) {
-            console.error(error);
-            statusDiv.innerText = 'Error: ' + error.message;
-            statusDiv.className = 'status error';
-        }
-    };
+            Object.keys(m).sort().forEach((k) => {
+                if (seen.has(k)) return;
+                addRow(k, k);
+            });
 
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-    }
-
-    function displayResults(data) {
-        const results = data.results || [];
-        resultsInfo.innerText = `Found ${data.total_found} results in ${data.processing_time_ms}ms`;
-
-        if (results.length === 0) {
-            resultsBody.innerHTML = '<tr><td colspan="7">No matches found.</td></tr>';
-            resultsTable.style.display = 'table';
-            return;
+            return rows.map((r) => `<dt>${esc(r.label)}</dt><dd>${esc(r.value)}</dd>`).join('');
         }
 
-        results.forEach(item => {
-            const row = document.createElement('tr');
-            
-            // Image URL - adjusted to handle local path from API
-            // The API serves images at /images/{filename}
-            // item.image_path is likely something like "images/filename.jpg" 
-            // but the mount point is /images
-            const imgPath = item.image_path.startsWith('images/') 
-                ? item.image_path.replace('images/', '') 
-                : item.image_path;
-            
-            const imgUrl = `${API_BASE_URL}/images/${imgPath}`;
+        function renderResults(items) {
+            const root = document.getElementById('results');
+            root.innerHTML = '';
 
-            row.innerHTML = `
-                <td><img src="${imgUrl}" class="thumbnail" onerror="this.src='https://via.placeholder.com/100?text=No+Image'"></td>
-                <td><strong>${item.design_no}</strong></td>
-                <td>${(item.similarity_score * 100).toFixed(2)}%</td>
-                <td>${item.gsm || '-'}</td>
-                <td>${item.width || '-'}</td>
-                <td>${item.stock || '-'}</td>
-                <td><small>${item.source_pdf || '-'}</small></td>
-            `;
-            resultsBody.appendChild(row);
-        });
+            if (!Array.isArray(items) || items.length === 0) {
+                root.innerHTML = '<p class="empty">No results.</p>';
+                return;
+            }
 
-        resultsTable.style.display = 'table';
-    }
-</script>
+            items.forEach((item, i) => {
+                const meta = item.metadata;
+                const path = meta && meta.image_path;
+                const src = mediaUrl(path);
 
+                const card = document.createElement('article');
+                card.className = 'card';
+
+                const img = document.createElement('img');
+                img.className = 'thumb';
+                img.alt = path ? String(path) : 'Result';
+                if (src) {
+                    img.src = src;
+                    img.onerror = () => { img.replaceWith(Object.assign(document.createElement('div'), { className: 'thumb', textContent: 'Image not found', style: 'display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#999;padding:0.5rem;width:10rem;height:10rem;box-sizing:border-box;' })); };
+                } else {
+                    img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect fill="#eee" width="100%" height="100%"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#999" font-size="12">No path</text></svg>');
+                }
+
+                const details = document.createElement('div');
+                details.className = 'details';
+                details.innerHTML =
+                    '<div class="rank">Match ' + (i + 1) + '</div>' +
+                    '<dl>' +
+                    '<dt>ID</dt><dd>' + esc(item.id) + '</dd>' +
+                    '<dt>Distance</dt><dd>' + formatDistance(item.distance) + '</dd>' +
+                    renderMetaRows(meta) +
+                    '</dl>';
+
+                card.appendChild(img);
+                card.appendChild(details);
+                root.appendChild(card);
+            });
+        }
+
+        async function checkHealth() {
+            const el = document.getElementById('health');
+            try {
+                const r = await fetch(API_BASE + '/api/v1/');
+                const j = await r.json();
+                el.textContent = r.ok ? JSON.stringify(j) : 'HTTP ' + r.status;
+                el.className = r.ok ? 'ok' : 'err';
+            } catch (e) {
+                el.textContent = 'unreachable: ' + e.message;
+                el.className = 'err';
+            }
+        }
+
+        document.getElementById('go').onclick = async () => {
+            const file = fileInput.files[0];
+            const msg = document.getElementById('msg');
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            if (!file) {
+                msg.textContent = 'Pick an image first.';
+                msg.className = 'err';
+                return;
+            }
+            msg.textContent = 'Searching…';
+            msg.className = '';
+            const fd = new FormData();
+            fd.append('image_file', file);
+            try {
+                const r = await fetch(API_BASE + '/api/v1/search', { method: 'POST', body: fd });
+                const text = await r.text();
+                let data;
+                try { data = JSON.parse(text); } catch { data = text; }
+                if (!r.ok) {
+                    msg.textContent = 'Error HTTP ' + r.status;
+                    msg.className = 'err';
+                    results.innerHTML = '<pre style="background:#fee;padding:1rem;overflow:auto;">' + esc(typeof data === 'string' ? data : JSON.stringify(data, null, 2)) + '</pre>';
+                    return;
+                }
+                msg.textContent = 'OK — ' + (Array.isArray(data) ? data.length + ' matches' : '');
+                msg.className = 'ok';
+                renderResults(data);
+            } catch (e) {
+                msg.textContent = e.message;
+                msg.className = 'err';
+            }
+        };
+
+        checkHealth();
+    </script>
 </body>
 </html>
