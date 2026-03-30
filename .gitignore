@@ -1,3 +1,31 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+.Python
+.venv/
+venv/
+env/
+
+.DS_Store
+
+# Local data and vector store
+chroma_db/
+data/output/*.json
+data/output/*.csv
+data/output/*.png
+data/output/*.jpg
+data/output/*.jpeg
+
+# Logs and temp files
+*.log
+*.tmp
+
+# IDE / editor
+.idea/
+.vscode/
+
 .env
 faiss_indices/
 output.json
